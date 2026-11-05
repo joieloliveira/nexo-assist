@@ -7,12 +7,16 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed": "tsx src/seed.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.6.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "jose": "^6.0.0",
+    "mongoose": "^8.19.0",
+    "zod": "^4.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
