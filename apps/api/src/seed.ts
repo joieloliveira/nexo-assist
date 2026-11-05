@@ -1,4 +1,7 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import { resolve } from "node:path";
+
+dotenv.config({ path: resolve(process.cwd(), "../../.env") });
 import mongoose from "mongoose";
 import { User } from "./models/user.js";
 
