@@ -1,0 +1,9 @@
+{
+  "name": "@nexo/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./types": "./src/types.ts"
+  }
+}
