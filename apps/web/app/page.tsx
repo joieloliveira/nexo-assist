@@ -1,18 +1,41 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import "./login.css";
 
 export default function HomePage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [notice, setNotice] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setNotice("Interface pronta! O acesso com usuários de demonstração será conectado à API na próxima etapa.");
+    setNotice("");
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data: { token?: string; user?: { role: "employee" | "analyst" }; error?: string } = await response.json();
+      if (!response.ok || !data.token || !data.user) {
+        setNotice(data.error ?? "Não foi possível entrar.");
+        return;
+      }
+      // Sessão temporária para a demonstração. Será substituída por cookie HttpOnly.
+      sessionStorage.setItem("nexo_token", data.token);
+      router.push(data.user.role === "analyst" ? "/analyst" : "/chat");
+    } catch {
+      setNotice("Não foi possível conectar à API. Verifique se o backend está ativo.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -45,7 +68,7 @@ export default function HomePage() {
             <label htmlFor="password">Senha</label>
             <div className="password-field"><input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Digite sua senha" value={password} onChange={(event) => setPassword(event.target.value)} required /><button type="button" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}>{showPassword ? "Ocultar" : "Mostrar"}</button></div>
             <label className="remember"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /> Manter conectado</label>
-            <button className="submit-button" type="submit">Entrar na plataforma <span aria-hidden="true">→</span></button>
+            <button className="submit-button" type="submit" disabled={loading}>{loading ? "Entrando..." : "Entrar na plataforma"} <span aria-hidden="true">→</span></button>
             {notice && <p className="form-notice" role="status">{notice}</p>}
           </form>
           <div className="security-note"><span aria-hidden="true">♢</span><span>Ambiente corporativo seguro. Seus dados são tratados com confidencialidade.</span></div>
